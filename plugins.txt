@@ -1,0 +1,21 @@
+https://docs.medusajs.com/modules/customers/admin/manage-customer-groups
+
+https://medusajs.com/plugins/medusa-plugin-auth/
+
+https://medusajs.com/blog/medusa-webhooks-best-technical-project-of-medusa-hackathon/
+
+https://medusajs.com/plugins/medusa-fulfillment-manual/
+
+// under review: https://medusajs.com/plugins/medusa-payment-manual/
+
+https://medusajs.com/plugins/medusa-plugin-sentry/
+
+https://medusajs.com/plugins/medusa-plugin-ultimate/
+
+https://medusajs.com/plugins/medusa-plugin-whatsapp-cloud-api/
+
+https://medusajs.com/plugins/medusa-plugin-sentry-ui/
+
+https://medusajs.com/plugins/medusa-product-ai-widget/
+
+https://medusajs.com/plugins/medusa-edit-optionvalue-metadata/

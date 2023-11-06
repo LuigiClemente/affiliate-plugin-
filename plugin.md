@@ -6,7 +6,7 @@ The Discount entity in the Medusa commerce application represents a discount off
 
 ## Entity Overview
 
-The Discount entity is responsible for managing various aspects of discounts, such as code, eligibility, and associated rules.
+The Discount entity is responsible for managing various aspects of discounts, such as code, eligibility, and associated rules. We have made some modifications to accommodate additional functionality related to commission types.
 
 ## Attributes
 
@@ -22,6 +22,7 @@ The Discount entity is responsible for managing various aspects of discounts, su
 * `usage_count` (number): Current count of how many times the discount has been used.
 * `user` (User): Reference to the related User entity for user-specific discounts.
 * `commission_percentage` (number | null): Percentage of the sale amount earned as commission (nullable).
+* `fixed_commission_amount` (number): Fixed amount commission (default: 0).
 
 ## Relationships
 
@@ -34,67 +35,45 @@ The Discount entity is responsible for managing various aspects of discounts, su
 
 The BeforeInsert method ensures that discount codes are consistently formatted for storage and retrieval. It converts the discount code to uppercase and trims whitespace.
 
-## Validation Method
+## Commission Configuration
 
-The `validateCommissionPercentage` method validates the `commission_percentage` attribute, ensuring that it falls within a valid range (0 to 100 if it represents a percentage).
+To accommodate commission-related changes, we have introduced two commission configuration attributes:
+
+* `commission_percentage` (number | null): Percentage of the sale amount earned as commission (nullable).
+* `fixed_commission_amount` (number): Fixed amount commission (default: 0).
+
+The `validateCommissionConfig` method ensures that only one commission configuration is set, either `commission_percentage` or `fixed_commission_amount`.
 
 ## Additional Functionality
 
-You can enhance the Discount entity by adding utility methods for total calculations, cascading deletes for DiscountRule-related Commissions, or any other custom functionality as needed.
+You can enhance the Discount entity by adding utility methods for total calculations related to commission types, cascading deletes for DiscountRule-related Commissions, or any other custom functionality as needed.
 
 ## Migration
 
-To add custom attributes and relationships to the Discount entity, you may need to create a migration. Below is an example of a migration script that adds user-related columns and commission-related columns:
+To add the fixed commission columns and reflect the changes in the database, you may need to create a migration script. Below is an example of a migration script that adds these columns:
 
 ```javascript
-// src/migrations/20230306000300-add-affiliate-columns-to-discount.js
+// src/migrations/20230306000301-add-commission-columns-to-discount.js
 
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class AddAffiliateColumnsToDiscount20230306000300 implements MigrationInterface {
+export class AddCommissionColumnsToDiscount20230306000301 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
 
-    // Add user_id column
+    // Add fixed_commission_amount column
     await queryRunner.query(`
       ALTER TABLE "discount" 
-      ADD COLUMN "user_id" uuid NULL
-    `);
-
-    // Add foreign key constraint 
-    await queryRunner.query(`
-      ALTER TABLE "discount"
-      ADD CONSTRAINT "fk_discount_user"  
-      FOREIGN KEY ("user_id")
-      REFERENCES "user"("id")
-      ON DELETE CASCADE
-    `);
-
-    // Add commission_percentage column
-    await queryRunner.query(`
-      ALTER TABLE "discount"
-      ADD COLUMN "commission_percentage" numeric(5,2) NULL 
+      ADD COLUMN "fixed_commission_amount" numeric(10,2) DEFAULT 0 NOT NULL
     `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
 
-    // Drop commission_percentage column
+    // Drop fixed_commission_amount column
     await queryRunner.query(`
       ALTER TABLE "discount"
-      DROP COLUMN "commission_percentage"
-    `);
-    
-    // Drop foreign key constraint
-    await queryRunner.query(`
-      ALTER TABLE "discount"
-      DROP CONSTRAINT "fk_discount_user"
-    `);
-
-    // Drop user_id column
-    await queryRunner.query(`
-      ALTER TABLE "discount"
-      DROP COLUMN "user_id"
+      DROP COLUMN "fixed_commission_amount"
     `);
   }
 }
@@ -111,13 +90,14 @@ declare module "@medusajs/medusa" {
   interface Discount {
     user: User;
     commission_percentage: number;
+    fixed_commission_amount: number;
   }
 }
 ```
 
 ## Model Extension
 
-To create an extended Discount entity, you can create a model file as follows:
+To create an extended Discount entity with the changes, you can create a model file as follows:
 
 ```typescript
 // src/models/discount.ts
@@ -143,7 +123,8 @@ export default async function () {
   imports.allowedDiscountFields = [
     ...imports.allowedDiscountFields,
     "user",
-    "commission_percentage"
+    "commission_percentage",
+    "fixed_commission_amount"
   ];
 }
 ```
@@ -160,4 +141,4 @@ You can compile the TypeScript files by adding a build script to your project:
 }
 ```
 
-This documentation covers the Discount entity in the Medusa commerce application, along with customization and extension options for specific needs.
+This documentation covers the Discount entity in the Medusa commerce application, along with the changes related to commission types and customization options for specific needs.

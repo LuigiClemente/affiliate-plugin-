@@ -18,4 +18,4 @@ https://medusajs.com/plugins/medusa-plugin-sentry-ui/
 
 https://medusajs.com/plugins/medusa-product-ai-widget/
 
-https://medusajs.com/plugins/medusa-edit-optionvalue-metadata/
+https://medusajs.com/plugins/medusa-edit-optionvalue-metadata/ // if helpful for ie pay monthly price vs pay annually 

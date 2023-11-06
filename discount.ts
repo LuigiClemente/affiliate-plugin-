@@ -67,7 +67,11 @@ export class Discount extends SoftDeletableEntity {
 
   // Commission Percentage: Percentage of sale amount earned as commission (nullable).
   @Column({ type: "decimal", precision: 5, scale: 2, nullable: true })
-  commission_percentage: number;
+  commission_percentage: number | null; // Allow null for flexibility
+
+  // Fixed Commission Amount: Fixed amount commission (default: 0).
+  @Column({ type: "decimal", precision: 10, scale: 2, default: 0 })
+  fixed_commission_amount: number;
 
   // Related Commissions: Commission records associated with this discount.
   @OneToMany(() => Commission, (commission) => commission.discount)
@@ -87,14 +91,12 @@ export class Discount extends SoftDeletableEntity {
   }
 
   /**
-   * Validate commission_percentage.
-   * Ensure that commission_percentage is within a valid range (0 to 100 if it represents a percentage).
+   * Validate commission_percentage or fixed_commission_amount.
+   * Ensure only one commission configuration is set.
    */
-  private validateCommissionPercentage(): boolean {
-    if (this.commission_percentage !== null) {
-      return this.commission_percentage >= 0 && this.commission_percentage <= 100;
-    }
-    return true; // Null is allowed
+  private validateCommissionConfig(): boolean {
+    return (this.commission_percentage === null && this.fixed_commission_amount !== null) ||
+           (this.commission_percentage !== null && this.fixed_commission_amount === null);
   }
 
   // Additional Functionality:

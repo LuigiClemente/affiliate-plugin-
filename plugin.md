@@ -53,30 +53,70 @@ You can enhance the Discount entity by adding utility methods for total calculat
 To add the fixed commission columns and reflect the changes in the database, you may need to create a migration script. Below is an example of a migration script that adds these columns:
 
 ```javascript
-// src/migrations/20230306000301-add-commission-columns-to-discount.js
+// src/migrations/20230306000300-add-commission-columns-to-discount.js
 
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class AddCommissionColumnsToDiscount20230306000301 implements MigrationInterface {
+export class AddCommissionColumnsToDiscount20230306000300 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
 
-    // Add fixed_commission_amount column
+    // Add user_id column
     await queryRunner.query(`
       ALTER TABLE "discount" 
+      ADD COLUMN "user_id" uuid NULL
+    `);
+
+    // Add foreign key constraint 
+    await queryRunner.query(`
+      ALTER TABLE "discount"
+      ADD CONSTRAINT "fk_discount_user"  
+      FOREIGN KEY ("user_id")
+      REFERENCES "user"("id")
+      ON DELETE CASCADE
+    `);
+
+    // Add commission_percentage column
+    await queryRunner.query(`
+      ALTER TABLE "discount"
+      ADD COLUMN "commission_percentage" numeric(5,2) NULL 
+    `);
+
+    // Add fixed_commission_amount column
+    await queryRunner.query(`
+      ALTER TABLE "discount"
       ADD COLUMN "fixed_commission_amount" numeric(10,2) DEFAULT 0 NOT NULL
     `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
 
+    // Drop commission_percentage column
+    await queryRunner.query(`
+      ALTER TABLE "discount"
+      DROP COLUMN "commission_percentage"
+    `);
+
     // Drop fixed_commission_amount column
     await queryRunner.query(`
       ALTER TABLE "discount"
       DROP COLUMN "fixed_commission_amount"
     `);
+
+    // Drop foreign key constraint
+    await queryRunner.query(`
+      ALTER TABLE "discount"
+      DROP CONSTRAINT "fk_discount_user"
+    `);
+
+    // Drop user_id column
+    await queryRunner.query(`
+      ALTER TABLE "discount"
+      DROP COLUMN "user_id"
+    `);
   }
 }
+
 ```
 
 ## TypeScript Declaration File
